@@ -1,7 +1,7 @@
 const { Engine, Render, Runner, World, Bodies, Body, Events } = Matter;
 
-const cellsHorizontal = 4;
-const cellsVertical = 3;
+const cellsHorizontal = 14;
+const cellsVertical = 10;
 const width = window.innerWidth;
 const height = window.innerHeight;
 
@@ -23,13 +23,12 @@ const render = Render.create({
 Render.run(render);
 Runner.run(Runner.create(), engine);
 
-
 // Walls
 const walls = [
     Bodies.rectangle(width / 2, 0, width, 2, { isStatic: true}),
     Bodies.rectangle(width / 2, height, width, 2, { isStatic: true}),
     Bodies.rectangle(0, height / 2, 2, height, { isStatic: true}),
-    Bodies.rectangle(width, height / 2, 2, height, {isStatic: true})
+    Bodies.rectangle(width, height / 2, 2, height, { isStatic: true })
 ];
 World.add(world, walls);
 
@@ -47,23 +46,24 @@ const shuffle = (arr) => {
         arr[counter] = arr[index];
         arr[index] = temp;
     }
+
     return arr;
 };
 
-const grid = Array(cells)
+const grid = Array(cellsVertical)
 .fill(null)
-.map(() => Array(cells).fill(false));
+.map(() => Array(cellsHorizontal).fill(false));
 
-const verticals = Array(cells)
+const verticals = Array(cellsVertical)
 .fill(null)
-.map(() => Array(cells - 1).fill(false));
+.map(() => Array(cellsHorizontal - 1).fill(false));
 
-const horizontals = Array(cells - 1)
+const horizontals = Array(cellsVertical - 1)
 .fill(null)
-.map(() => Array(cells).fill(false));
+.map(() => Array(cellsHorizontal).fill(false));
 
-const startRow = Math.floor(Math.random() * cells);
-const startColumn = Math.floor(Math.random() * cells);
+const startRow = Math.floor(Math.random() * cellsVertical);
+const startColumn = Math.floor(Math.random() * cellsHorizontal);
 
 const stepThroughCell = (row, column) => {
     // If i have visited the cell at [row, column], then return
@@ -76,10 +76,10 @@ const stepThroughCell = (row, column) => {
 
     //Assemble randomly-ordered list of neighbors
     const neighbors = shuffle([
-        [row -1, column, 'up'],
+        [row - 1, column, 'up'],
         [row, column + 1, 'right'],
         [row + 1, column, 'down'],
-        [row, column -1, 'left']
+        [row, column - 1, 'left']
     ]);
 
     // For each neighbor....
@@ -87,7 +87,7 @@ const stepThroughCell = (row, column) => {
         const [nextRow, nextColumn, direction] = neighbor;
 
         // See if that neighbor is out of bounds
-        if (nextRow < 0 || nextRow >= cells || nextColumn < 0 || nextColumn >= cells) {
+        if (nextRow < 0 || nextRow >= cellsVertical || nextColumn < 0 || nextColumn >= cellsHorizontal) {
             continue;
         } 
 
@@ -98,11 +98,11 @@ const stepThroughCell = (row, column) => {
 
        // Remove a wall from either horizontals or verticals
        if ( direction === 'left') {
-           verticals[row][column -1] = true;
+           verticals[row][column - 1] = true;
        } else if (direction === 'right') {
            verticals[row][column] = true;
        } else if (direction === 'up') {
-           horizontals[row -1][column] = true;
+           horizontals[row - 1][column] = true;
        } else if (direction === 'down') {
            horizontals[row][column] = true;
        }
@@ -120,9 +120,9 @@ horizontals.forEach((row, rowIndex) => {
         }
 
         const wall = Bodies.rectangle(
-            columnIndex * unitLength + unitLength / 2,
-            rowIndex * unitLength + unitLength,
-            unitLength,
+            columnIndex * unitLengthX + unitLengthX / 2,
+            rowIndex * unitLengthY + unitLengthY,
+            unitLengthX,
             5,
             {
                 label: 'wall',
@@ -140,10 +140,10 @@ verticals.forEach((row, rowIndex) => {
         }
 
         const wall = Bodies.rectangle(
-            columnIndex * unitLength + unitLength,
-            rowIndex * unitLength + unitLength / 2,
+            columnIndex * unitLengthX + unitLengthX,
+            rowIndex * unitLengthY + unitLengthY / 2,
             5,
-            unitLength,
+            unitLengthY,
             {
                 label: 'wall',
                 isStatic: true
@@ -156,10 +156,10 @@ verticals.forEach((row, rowIndex) => {
 // Goal
 
 const goal = Bodies.rectangle(
-    width - unitLength / 2,
-    height - unitLength / 2,
-    unitLength * .7,
-    unitLength * .7,
+    width - unitLengthX / 2,
+    height - unitLengthY / 2,
+    unitLengthX * 0.7,
+    unitLengthY * 0.7,
     {
         label: 'goal',
         isStatic: true
@@ -169,7 +169,8 @@ World.add(world, goal);
 
 // Ball
 
-const ball = Bodies.circle(unitLength / 2, unitLength / 2, unitLength / 4, {
+const ballRadius = Math.min(unitLengthX, unitLengthY) / 4;
+const ball = Bodies.circle(unitLengthX / 2, unitLengthY / 2, ballRadius, {
     label: 'ball'
 });
 World.add(world, ball);
